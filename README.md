@@ -1,5 +1,7 @@
 # 暑假实训
-sbwqd
+sb lmy 
+sb cxy
+nb wqd
 
 # 答辩要求
 
