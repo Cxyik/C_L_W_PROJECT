@@ -105,7 +105,7 @@ public class SearchController {
                         }
                     }
                 }
-// 对新版 Word 文件（.docx）进行处理
+                // 对新版 Word 文件（.docx）进行处理
                 else if (fileName.endsWith(".docx")) {
                     XWPFDocument document = new XWPFDocument(fis);
                     List<XWPFParagraph> paragraphs = document.getParagraphs();
