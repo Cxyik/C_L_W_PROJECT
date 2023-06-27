@@ -8,11 +8,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.example.JDBCClass.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class FileController {
+    UserRepository userRepository;
+
+    @Autowired
+    public FileController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @GetMapping("/file-list")
     public Map<String, Object> getFileList(@RequestParam("path") String path) {
@@ -41,6 +49,15 @@ public class FileController {
         // 将文件列表放入Map中返回
         Map<String, List<String>> result = new HashMap<>();
         result.put("fileList", files);
+        userRepository.deleteUser();
+        for (String key : result.keySet()) {
+            // 获取当前键对应的值
+            List<String> values = result.get(key);
+            for(String str:values){
+                userRepository.createUser(path+"/"+str);
+            }
+
+        }
         return result;
     }
 

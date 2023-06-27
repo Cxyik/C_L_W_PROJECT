@@ -1,6 +1,11 @@
 <template>
-    <div style="border-bottom: 1px solid black;">
-        <p id="back" @click="back">返回上一级</p>
+    <div style="float: left;border-right: 1px solid bisque;
+    height: 100vh; /* 设置固定的高度，使用视口高度作为示例 */
+    overflow-y: auto; /* 添加垂直滚动条 */">
+        <div id="myOperate">
+            <button @click="back">返回上一级</button>
+            <button @click="shwow">选定</button>
+        </div>
         <div class="w-titleq">
             <span id="t-content">目录</span>
             <span id="t-operate">操作</span>
@@ -13,17 +18,24 @@
                 </span>
             </li>
         </ul>
-        <div id="select-disk">
-            <button @click="shwow">选定</button>
-        </div>
 
+
+
+    </div>
+    <div style="float: left;width: 30%;">
         <ul id="taregtfile">
             <div id="target-title">选定文件夹下，具有的可查询文件(txt\word\pdf)如下</div>
-            <li v-for="(item,index) in targetFile" :key="index">
+            <li v-for="(item, index) in targetFile" :key="index">
                 <span><img :src="get_src(item)" alt=""></span>
                 <span>{{ item }}</span>
             </li>
         </ul>
+    </div>
+    <div style="float: left;width: 35%;margin-left: 5rem;
+    text-align: center;border-left: 1px solid bisque;
+    height: 100vh; /* 设置固定的高度，使用视口高度作为示例 */
+    overflow-y: auto; /* 添加垂直滚动条 */">
+        <KeyWord></KeyWord>
     </div>
 </template>
    
@@ -31,6 +43,7 @@
 import axios from 'axios'
 import { useStore } from 'vuex'
 import { computed } from 'vue'
+import KeyWord from './KeyWord.vue'
 
 export default {
     data() {
@@ -40,17 +53,19 @@ export default {
             selectedItems: '',
             selectedItemsList: [],
 
-            targetFile:[],
-            pdf_src:'../icon/pdf.png',
-            word_src:'../icon/word.png',
-            txt_src:'../icon/txt.png'
+            targetFile: [],
+            pdf_src: '../icon/pdf.png',
+            word_src: '../icon/word.png',
+            txt_src: '../icon/txt.png'
         }
     },
-    props: {
-        message: String
+    components:{
+        KeyWord
     },
     created() {
-
+        this.myPath = this.$route.params.variable;
+        console.log("已选硬盘" + this.$route.params.variable)
+        this.getItem('')
     },
     methods: {
         getFileList(path) {
@@ -81,29 +96,36 @@ export default {
                 return;
             }
             this.selectedItemsList.push(selectedItem);
-            this.$message({
-                message: '目标文件选定成功',
-                type: 'success'
-            });
+
             // 管理变量状态
             this.modify(this.myPath + "/" + this.selectedItemsList)
 
             // 获取目标文件夹下的各种txt\word\pdf文件
             axios.get(`http://127.0.0.1:8080/api/files?path=${this.MyPath}`).then((response) => {
-                console.log("已选目标文件夹："+this.MyPath)
                 this.targetFile = response.data.fileList
-                console.log("目标文件夹下具有的可查询文件："+this.targetFile)
+                if (this.targetFile.length === 0) {
+                    this.$message({
+                        message: '文件夹中无可检索文件',
+                        type: 'warning'
+                    });
+                }
+                else{
+                    this.$message({
+                        message: '文件夹选定成功',
+                        type: 'success'
+                    });
+                }
             })
         },
         // 依据文件结尾，获取图标
-        get_src(item){
-            if(item.endsWith("txt")){
+        get_src(item) {
+            if (item.endsWith("txt")) {
                 return this.txt_src
             }
-            else if(item.endsWith("pdf")){
+            else if (item.endsWith("pdf")) {
                 return this.pdf_src
             }
-            else if(item.endsWith("doc")||item.endsWith("docx")){
+            else if (item.endsWith("doc") || item.endsWith("docx")) {
                 return this.word_src
             }
         }
@@ -129,33 +151,64 @@ export default {
 </script>
 
 <style>
+#w-content {
+    margin: 1rem 2rem 0;
+    padding: 0;
+}
+
 #w-content li {
     list-style: none;
-    width: 15rem;
+    width: 20rem;
     height: 1.3rem;
     margin: 0.2rem 0 0;
     border: 1px solid rgb(133, 133, 133);
     cursor: pointer;
     padding-left: 0.1rem;
 }
-#taregtfile li{
+
+#myOperate {
+    width: 100%;
+    height: 2rem;
+    /* background-color: #007bff; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+#myOperate button {
+    margin: 1.2rem;
+    width: 7rem;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: center;
+}
+
+#taregtfile li {
     list-style: none;
     padding-left: 2rem;
     margin: 1rem 0 0;
 }
-#taregtfile li span img{
+
+#taregtfile li span img {
     width: 1.2rem;
     vertical-align: middle;
     margin-right: 1rem;
 }
-#target-title{
+
+#target-title {
     font-weight: 600;
     margin-bottom: 2rem;
 }
+
 .w-titleq {
-    width: 15.1rem;
+    width: 20rem;
     height: 2.2rem;
-    margin-left: 2.5rem;
+    margin: 2rem 2rem 0;
     border: 1px solid;
 }
 
@@ -173,7 +226,7 @@ export default {
 
 #label {
     float: left;
-    width: 9.9rem;
+    width: 14.9rem;
     border-right: 1px solid;
     white-space: nowrap;
     /* 禁用文本换行 */
@@ -205,11 +258,7 @@ export default {
     text-align: center;
 }
 
-#select-disk {
-    position: absolute;
-    right: 0;
-    bottom: 144rem;
-}
+#select-disk {}
 
 #select-disk button {
     padding: 10px 20px;

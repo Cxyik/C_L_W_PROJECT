@@ -9,7 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 // 优质的 spring/boot/data/security/cloud 框架中文文档尽在 => https://springdoc.cn
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.example", "com.example.controllers"})
+@ComponentScan(basePackages = {"com.example", "com.example.controllers", "com.example.JDBCClass"})
 public class FileBackendApplication {
 
     public static void main(String[] args) {
