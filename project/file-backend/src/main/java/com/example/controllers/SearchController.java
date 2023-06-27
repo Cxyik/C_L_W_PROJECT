@@ -1,8 +1,9 @@
 package com.example.controllers;
 
-
-
-import com.example.JDBCClass.UserRepository;
+import com.example.mapper.UserMapperRepository;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.SneakyThrows;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.hwpf.HWPFDocument;
@@ -15,27 +16,25 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class SearchController {
-
-    UserRepository userRepository;
+    private final UserMapperRepository userMapperRepository;
 
     @Autowired
-    public SearchController(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public SearchController(UserMapperRepository userMapperRepository) {
+        this.userMapperRepository = userMapperRepository;
     }
 
     @GetMapping("/search")
     public List<SearchResult> searchFiles(@RequestParam String keyword) {
-        List<String> list_path = userRepository.findAllUsers();
+        List<String> list_path = userMapperRepository.findAllUsers();
         List<SearchResult> results = new ArrayList<>();
         if (!StringUtils.hasText(keyword) || list_path.isEmpty()) {
             return results;
@@ -51,101 +50,78 @@ public class SearchController {
         }
         return results;
     }
+
     private boolean isSupportedFileType(File file) {
         String fileName = file.getName();
         return fileName.endsWith(".txt") || fileName.endsWith(".pdf") || fileName.endsWith(".doc") || fileName.endsWith(".docx");
     }
+
+    @SneakyThrows
     private SearchResult searchInFile(File file, String keyword) {
         SearchResult result = null;
         String fileName = file.getName();
+        // 处理文本文件
         if (fileName.endsWith(".txt")) {
-            // 处理文本文件
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
-                String line;
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+            String line;
+            int lineNumber = 1;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains(keyword)) {
+                    if (result == null) {
+                        result = new SearchResult(file.getAbsolutePath());
+                    }
+                    result.addMatch(new Match(lineNumber, line));
+                }
+                lineNumber++;
+            }
+        } else if (fileName.endsWith(".doc") || fileName.endsWith(".docx")) {
+            FileInputStream fis = new FileInputStream(file);
+            int lineWidth = 19; // 设置行宽，例如80个字符
+            // 对旧版 Word 文件（.doc）进行处理
+            if (fileName.endsWith(".doc")) {
+                HWPFDocument document = new HWPFDocument(fis);
+                Range range = document.getRange();
                 int lineNumber = 1;
-                while ((line = reader.readLine()) != null) {
-                    System.out.println(line);
-                    if (line.contains(keyword)) {
+                String text = range.text();
+                StringBuilder paragraphTextBuilder = new StringBuilder();
+                for (char c : text.toCharArray()) {
+                    paragraphTextBuilder.append(c);
+                    if (paragraphTextBuilder.length() % lineWidth == 0 && c != '\n') {
+                        paragraphTextBuilder.append('\n'); // 在行宽处插入换行符
+                    }
+                }
+                String[] paragraphs = paragraphTextBuilder.toString().split("\\r\\n|\\r|\\n");
+                for (String paragraph : paragraphs) {
+                    if (paragraph.contains(keyword)) {
+                        System.out.println(paragraph);
                         if (result == null) {
                             result = new SearchResult(file.getAbsolutePath());
                         }
-                        result.addMatch(new Match(lineNumber, line));
+                        result.addMatch(new Match(lineNumber, paragraph));
                     }
                     lineNumber++;
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-        } else if (fileName.endsWith(".doc")||fileName.endsWith(".docx")) {
-            try (FileInputStream fis = new FileInputStream(file)) {
-                int lineWidth = 19; // 设置行宽，例如80个字符
-                // 对旧版 Word 文件（.doc）进行处理
-                if (fileName.endsWith(".doc")) {
-                    HWPFDocument document = new HWPFDocument(fis);
-                    Range range = document.getRange();
-                    int lineNumber = 1;
-                    String text = range.text();
-                    StringBuilder paragraphTextBuilder = new StringBuilder();
-                    for (char c : text.toCharArray()) {
-                        paragraphTextBuilder.append(c);
-                        if (paragraphTextBuilder.length() % lineWidth == 0 && c != '\n') {
-                            paragraphTextBuilder.append('\n'); // 在行宽处插入换行符
-                        }
-                    }
-                    String[] paragraphs = paragraphTextBuilder.toString().split("\\r\\n|\\r|\\n");
-                    for (String paragraph : paragraphs) {
-                        if (paragraph.contains(keyword)) {
-                            System.out.println(paragraph);
-                            if (result == null) {
-                                result = new SearchResult(file.getAbsolutePath());
-                            }
-                            result.addMatch(new Match(lineNumber, paragraph));
-                        }
-                        lineNumber++;
-                    }
-                }
-                // 对新版 Word 文件（.docx）进行处理
-                else if (fileName.endsWith(".docx")) {
-                    XWPFDocument document = new XWPFDocument(fis);
-                    List<XWPFParagraph> paragraphs = document.getParagraphs();
-                    StringBuilder sb = new StringBuilder();
-                    StringBuilder paragraphTextBuilder = new StringBuilder();
-                    int lineNumber = 1;
-                    for (XWPFParagraph paragraph : paragraphs) {
-                        sb.append(paragraph.getText());
-                        sb.append("\n");
-                    }
-                    for (int i = 0; i < sb.length(); i++) {
-                        char c = sb.charAt(i);
-                        paragraphTextBuilder.append(c);
-                        if (paragraphTextBuilder.length() % lineWidth == 0 && c != '\n') {
-                            paragraphTextBuilder.append('\n'); // 在行宽处插入换行符
-                        }
-                    }
-                    String[] lines = paragraphTextBuilder.toString().split("\\r\\n|\\r|\\n");
-                    for (String line : lines) {
-                        if (line.contains(keyword)) {
-                            System.out.println(line);
-                            if (result == null) {
-                                result = new SearchResult(file.getAbsolutePath());
-                            }
-                            result.addMatch(new Match(lineNumber, line));
-                        }
-                        lineNumber++;
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }else if (fileName.endsWith(".pdf")) {
-            // 处理 PDF 文件
-            try (PDDocument document = PDDocument.load(file)) {
-                PDFTextStripper stripper = new PDFTextStripper();
-                String text = stripper.getText(document);
-                String[] lines = text.split("\n");
+            // 对新版 Word 文件（.docx）进行处理
+            else if (fileName.endsWith(".docx")) {
                 int lineNumber = 1;
+                XWPFDocument document = new XWPFDocument(fis);
+                List<XWPFParagraph> paragraphs = document.getParagraphs();
+                StringBuilder stringBuilder = new StringBuilder();
+                StringBuilder paragraphTextBuilder = new StringBuilder();
+                for (XWPFParagraph paragraph : paragraphs) {
+                    stringBuilder.append(paragraph.getText());
+                    stringBuilder.append("\n");
+                }
+                for (int i = 0; i < stringBuilder.length(); i++) {
+                    char c = stringBuilder.charAt(i);
+                    paragraphTextBuilder.append(c);
+                    if (paragraphTextBuilder.length() % lineWidth == 0 && c != '\n') {
+                        paragraphTextBuilder.append('\n'); // 在行宽处插入换行符
+                    }
+                }
+                String[] lines = paragraphTextBuilder.toString().split("\\r\\n|\\r|\\n");
                 for (String line : lines) {
-                    System.out.println(line);
                     if (line.contains(keyword)) {
                         if (result == null) {
                             result = new SearchResult(file.getAbsolutePath());
@@ -154,59 +130,46 @@ public class SearchController {
                     }
                     lineNumber++;
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+            }
+        }
+        // 处理 PDF 文件
+        else if (fileName.endsWith(".pdf")) {
+            PDDocument document = PDDocument.load(file);
+            PDFTextStripper stripper = new PDFTextStripper();
+            String text = stripper.getText(document);
+            String[] lines = text.split("\n");
+            int lineNumber = 1;
+            for (String line : lines) {
+                if (line.contains(keyword)) {
+                    if (result == null) {
+                        result = new SearchResult(file.getAbsolutePath());
+                    }
+                    result.addMatch(new Match(lineNumber, line));
+                }
+                lineNumber++;
             }
         }
         return result;
     }
+    @Data
     public static class SearchResult {
-        private String filePath;
-        private List<Match> matches;
+        private final String filePath;
+        private final List<Match> matches;
 
         public SearchResult(String filePath) {
             this.filePath = filePath;
             this.matches = new ArrayList<>();
         }
 
-        public String getFilePath() {
-            return filePath;
-        }
-
-        public List<Match> getMatches() {
-            return matches;
-        }
-
         public void addMatch(Match match) {
             matches.add(match);
         }
-
-        public void show() {
-            for (Match m : matches) {
-                System.out.println(filePath + m.getString());
-            }
-        }
     }
 
+    @Data
+    @AllArgsConstructor
     public static class Match {
-        private int lineNumber;
-        private String lineContent;
-
-        public Match(int lineNumber, String lineContent) {
-            this.lineNumber = lineNumber;
-            this.lineContent = lineContent;
-        }
-
-        public int getLineNumber() {
-            return lineNumber;
-        }
-
-        public String getLineContent() {
-            return lineContent;
-        }
-
-        public String getString() {
-            return "结果：第" + lineNumber + "行，关键词:" + lineContent;
-        }
+        private final int lineNumber;
+        private final String lineContent;
     }
 }
