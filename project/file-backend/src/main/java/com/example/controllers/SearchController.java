@@ -2,17 +2,27 @@ package com.example.controllers;
 
 
 
+<<<<<<< HEAD
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.extractor.WordExtractor;
 import org.apache.poi.hwpf.usermodel.CharacterRun;
 import org.apache.poi.hwpf.usermodel.Paragraph;
+=======
+import com.example.JDBCClass.UserRepository;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.poi.hwpf.HWPFDocument;
+>>>>>>> 226dcf06765855d23075194c79e0fe6c18aad6b8
 import org.apache.poi.hwpf.usermodel.Range;
-import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+<<<<<<< HEAD
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+=======
+import org.springframework.beans.factory.annotation.Autowired;
+>>>>>>> 226dcf06765855d23075194c79e0fe6c18aad6b8
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,9 +38,22 @@ import java.util.List;
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class SearchController {
+<<<<<<< HEAD
+=======
+
+    UserRepository userRepository;
+
+    @Autowired
+    public SearchController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+>>>>>>> 226dcf06765855d23075194c79e0fe6c18aad6b8
     @GetMapping("/search")
-    public List<SearchResult> searchFiles(@RequestParam String keyword, @RequestParam String folderPath) {
+    public List<SearchResult> searchFiles(@RequestParam String keyword) {
+        List<String> list_path = userRepository.findAllUsers();
         List<SearchResult> results = new ArrayList<>();
+<<<<<<< HEAD
         if (!StringUtils.hasText(keyword) || !StringUtils.hasText(folderPath)) {
             return results;
         }
@@ -43,15 +66,19 @@ public class SearchController {
             return results;
         }
         for (File file : files) {
+=======
+        if (!StringUtils.hasText(keyword) || list_path.isEmpty()) {
+            return results;
+        }
+        for (String filePath : list_path) {
+            File file = new File(filePath);
+>>>>>>> 226dcf06765855d23075194c79e0fe6c18aad6b8
             if (file.isFile() && isSupportedFileType(file)) {
                 SearchResult result = searchInFile(file, keyword);
                 if (result != null) {
                     results.add(result);
                 }
             }
-        }
-        for(SearchResult s:results){
-            s.show();
         }
         return results;
     }
@@ -180,9 +207,10 @@ public class SearchController {
         public void addMatch(Match match) {
             matches.add(match);
         }
-        public void show(){
-            for(Match m:matches){
-                System.out.println(filePath+m.getString());
+
+        public void show() {
+            for (Match m : matches) {
+                System.out.println(filePath + m.getString());
             }
         }
     }
@@ -199,8 +227,14 @@ public class SearchController {
         public String getLineContent() {
             return lineContent;
         }
+<<<<<<< HEAD
         public String getString(){
             return "结果：第"+lineNumber+"行，关键词:"+lineContent;
+=======
+
+        public String getString() {
+            return "结果：第" + lineNumber + "行，关键词:" + lineContent;
+>>>>>>> 226dcf06765855d23075194c79e0fe6c18aad6b8
         }
     }
 }

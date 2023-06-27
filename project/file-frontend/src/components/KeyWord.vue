@@ -47,7 +47,11 @@ export default {
     },
     methods: {
         handleSearch() {
+<<<<<<< HEAD
             axios.get(`http://127.0.0.1:8080/search?keyword=${encodeURIComponent(this.searchText)}&folderPath=${encodeURIComponent(this.MyPath)}`).then((response) => {
+=======
+            axios.get(`http://127.0.0.1:8080/search?keyword=${encodeURIComponent(this.searchText)}`).then((response) => {
+>>>>>>> 226dcf06765855d23075194c79e0fe6c18aad6b8
                 this.searchResult = response.data
                 console.log(response.data.length)
                 if(response.data.length === 0){
