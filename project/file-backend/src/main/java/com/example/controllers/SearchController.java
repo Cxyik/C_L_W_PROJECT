@@ -7,9 +7,8 @@ import lombok.SneakyThrows;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.hwpf.HWPFDocument;
-import org.apache.poi.hwpf.usermodel.Range;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.hwpf.usermodel.*;
+import org.apache.poi.xwpf.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -77,6 +76,7 @@ public class SearchController {
             int lineWidth = 19; // 设置行宽，例如80个字符
             // 对旧版 Word 文件（.doc）进行处理
             if (fileName.endsWith(".doc")) {
+//                处理文本段落
                 HWPFDocument document = new HWPFDocument(fis);
                 Range range = document.getRange();
                 int lineNumber = 1;
@@ -98,6 +98,28 @@ public class SearchController {
                         result.addMatch(new Match(lineNumber, paragraph));
                     }
                     lineNumber++;
+                }
+
+//                处理表格
+                // 处理表格（tables）
+                Range range_0 = document.getRange();
+                TableIterator tableIterator = new TableIterator(range_0);
+                while (tableIterator.hasNext()) {
+                    Table table = tableIterator.next();
+                    for (int row = 0; row < table.numRows(); row++) {
+                        TableRow tableRow = table.getRow(row);
+                        for (int col = 0; col < tableRow.numCells(); col++) {
+                            TableCell tableCell = tableRow.getCell(col);
+                            String cellText = tableCell.text();
+                            if (cellText.contains(keyword)) {
+                                System.out.println(cellText);
+                                if (result == null) {
+                                    result = new SearchResult(file.getAbsolutePath());
+                                }
+                                result.addMatch(new Match(row,cellText));
+                            }
+                        }
+                    }
                 }
             }
             // 对新版 Word 文件（.docx）进行处理
@@ -127,6 +149,26 @@ public class SearchController {
                         result.addMatch(new Match(lineNumber, line));
                     }
                     lineNumber++;
+                }
+
+                // 处理表格（tables）
+                List<XWPFTable> tables = document.getTables();
+                for (XWPFTable table : tables) {
+                    for (int row = 0; row < table.getNumberOfRows(); row++) {
+                        XWPFTableRow tableRow = table.getRow(row);
+                        List<XWPFTableCell> tableCells = tableRow.getTableCells();
+                        for (int col = 0; col < tableCells.size(); col++) {
+                            XWPFTableCell tableCell = tableCells.get(col);
+                            String cellText = tableCell.getText();
+                            if (cellText.contains(keyword)) {
+                                System.out.println(cellText);
+                                if (result == null) {
+                                    result = new SearchResult(file.getAbsolutePath());
+                                }
+                                result.addMatch(new Match(row, cellText));
+                            }
+                        }
+                    }
                 }
             }
         }

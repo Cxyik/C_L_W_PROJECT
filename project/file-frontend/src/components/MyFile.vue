@@ -70,7 +70,7 @@ export default {
     },
     methods: {
         getFileList(path) {
-            axios.get(`http://127.0.0.1:8080/api/file-list?path=${path}`).then((response) => {
+            axios.get(`http://localhost:8080/api/file-list?path=${path}`).then((response) => {
                 this.fileList = response.data.fileList
             })
         },
@@ -102,7 +102,7 @@ export default {
             this.modify(this.myPath + "/" + this.selectedItemsList)
 
             // 获取目标文件夹下的各种txt\word\pdf文件
-            axios.get(`http://127.0.0.1:8080/api/files?path=${this.MyPath}`).then((response) => {
+            axios.get(`http://localhost:8080/api/files?path=${this.MyPath}`).then((response) => {
                 this.targetFile = response.data.fileList
                 if (this.targetFile.length === 0) {
                     this.$message({

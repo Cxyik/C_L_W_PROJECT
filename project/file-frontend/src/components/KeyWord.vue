@@ -30,7 +30,12 @@
       <el-button @click="downloadSelectedItems" class="download-button" :disabled="isDownloadDisabled">
         <i class="el-icon-download"></i> 下载选中项
       </el-button>
+
     </div>
+  </div>
+  <div id="loading" v-if="isloading">
+    <img src="../img/loading.gif" alt="">
+    <div>loading...</div>
   </div>
 </template>
 
@@ -45,13 +50,16 @@ export default {
     return {
       searchText: '',
       searchResult: [],
+      isloading:false,
     }
   },
   methods: {
     handleSearch() {
-      axios.get(`http://127.0.0.1:8080/api/search?keyword=${encodeURIComponent(this.searchText)}`).then((response) => {
+      this.isloading = true
+      this.searchResult = []
+      axios.get(`http://localhost:8080/api/search?keyword=${encodeURIComponent(this.searchText)}`).then((response) => {
         this.searchResult = response.data
-        console.log(response.data.length)
+        this.isloading = false
         if (response.data.length === 0) {
           alert("无结果")
         }
@@ -121,31 +129,51 @@ export default {
 </script>
 
 <style>
-#help_e{
-    width: 100%;
-    position: relative;
-    
+#help_e {
+  width: 100%;
+  position: relative;
+
 }
-#keyword{
-    width: 80%;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+
+#keyword {
+  width: 80%;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
+
+#loading {
+  height: 80%;
+  background-color: rgb(222, 220, 220);
+  /* display: flex;
+  align-items: center;
+  justify-content: center; */
+
+}
+
+#loading img {
+  border-radius: 50%;
+  width: 10rem;
+  height: 10rem;
+  margin-top: 10rem;
+}
+
 #keyword div div {
-    padding: 0;
-    
+  padding: 0;
+
 }
-#result{
-    padding: 1rem;
+
+#result {
+  padding: 1rem;
 }
+
 #result li {
-    list-style: none;
-    text-align: left;
+  list-style: none;
+  text-align: left;
 }
 
 .highlighted {
-    color: red;
+  color: red;
 }
 
 .download-button {
