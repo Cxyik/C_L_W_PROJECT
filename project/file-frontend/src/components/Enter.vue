@@ -91,5 +91,32 @@ export default {
 body {
     overflow: hidden;
 }
+
+/* alter */
+
+#wqd1{
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    bottom: 1rem;
+    max-width: 1px;
+}
+#wqd2{
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    bottom: 1rem;
+    max-width: 1px;
+}
+#my_text{
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    bottom: 1rem;
+    max-width: 1px;
+}
 </style>
   
