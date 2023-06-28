@@ -1,7 +1,9 @@
 package com.example.controllers;
 
 import lombok.SneakyThrows;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.file.FileStore;
@@ -11,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api")
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class DiskController {
     @GetMapping("/disks")
     @SneakyThrows
@@ -22,5 +26,4 @@ public class DiskController {
         }
         return disks.toArray(new String[0]);
     }
-
 }

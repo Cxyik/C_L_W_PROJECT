@@ -43,7 +43,7 @@ export default {
     },
     methods: {
         getdisks: function () {
-            fetch("http://localhost:8080/disks", {
+            fetch("http://localhost:8080/api/disks", {
                 mode: 'cors',
                 headers: {
                     "Content-Type": "application/json"

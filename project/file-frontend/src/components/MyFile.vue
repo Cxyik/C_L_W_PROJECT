@@ -1,7 +1,8 @@
 <template>
     <div style="float: left;border-right: 1px solid bisque;
     height: 100vh; /* 设置固定的高度，使用视口高度作为示例 */
-    overflow-y: auto; /* 添加垂直滚动条 */">
+    overflow-y: auto; /* 添加垂直滚动条 */
+    position: relative;">
         <div id="myOperate">
             <button @click="back">返回上一级</button>
             <button @click="shwow">选定</button>
@@ -167,13 +168,14 @@ export default {
 }
 
 #myOperate {
-    width: 100%;
-    height: 2rem;
-    /* background-color: #007bff; */
+    height: 4rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 1rem;
+    position: fixed;
+    width: 27%;
+    background-color: antiquewhite;
+    z-index: 10;
 }
 
 #myOperate button {
@@ -208,7 +210,7 @@ export default {
 .w-titleq {
     width: 20rem;
     height: 2.2rem;
-    margin: 2rem 2rem 0;
+    margin: 4rem 2rem 0;
     border: 1px solid;
 }
 
