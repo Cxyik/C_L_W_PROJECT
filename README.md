@@ -7,6 +7,11 @@
 
 [2020212205062]陆铭一Luyeee
 
+# 项目环境
+前端：vue框架
+后端：springboot框架
+数据库：Mysql
+
 # 答辩要求
 - online: 给出访问域名地址 `url` 
 - PPT & 演示 (5分钟)
