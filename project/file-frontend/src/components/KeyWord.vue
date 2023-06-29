@@ -1,6 +1,6 @@
 <template>
   <div id="help_e">
-    <h2>关键词</h2>
+    <h2 id="key_word">关键词</h2>
     <div id="keyword">
       <el-input v-model="searchText" placeholder="请输入搜索关键词">
         <template v-slot:suffix>
@@ -129,6 +129,11 @@ export default {
 </script>
 
 <style>
+#key_word{
+  font-size: 1.2rem;
+  text-align: left;
+  padding: 1rem 1rem 1rem;
+}
 #help_e {
   width: 100%;
   position: relative;

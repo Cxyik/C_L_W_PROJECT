@@ -4,7 +4,7 @@
             <div class="login-box">
                 <h1 class="login-title">Welcome to Our App</h1>
                 <form class="login-form">
-                    <button class="login-button" @click="login">Login</button>
+                    <button class="login-button" @click="login">Enter</button>
                 </form>
             </div>
         </div>
@@ -54,7 +54,7 @@ export default {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    opacity: 0.5;
+    opacity: 0.7;
 }
 
 .login-title {

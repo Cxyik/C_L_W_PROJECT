@@ -70,6 +70,7 @@ export default {
     },
     methods: {
         getFileList(path) {
+            console.log(path)
             axios.get(`http://localhost:8080/api/file-list?path=${path}`).then((response) => {
                 this.fileList = response.data.fileList
             })
@@ -205,6 +206,7 @@ export default {
 #target-title {
     font-weight: 600;
     margin-bottom: 2rem;
+    margin-top: 1rem;
 }
 
 .w-titleq {

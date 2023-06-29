@@ -1,6 +1,6 @@
 <template>
     <div class="search-page">
-      <h1>登录</h1>
+      <h1 id="App_title">文件内容检索系统s</h1>
       <form @submit.prevent="submitForm">
         <input type="text" v-model="username" placeholder="用户名" />
         <input type="password" v-model="password" placeholder="密码" />
